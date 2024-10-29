@@ -6,34 +6,58 @@ struct RootView: View {
 
     var body: some View {
         Form {
-            switch permission.status {
-            case .unknown:
-                requestPermissionView
-            case .authorized:
-                recordingView
-            case .denied:
-                permissionDeniedView
+            Section("Required Permissions") {
+                if permission.isAllGranted {
+                    LabeledContent("All Permissions Granted") {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                    }
+                    recordingView
+                } else {
+                    // 系统音频权限
+                    LabeledContent("System Audio Recording") {
+                        switch permission.audioStatus {
+                        case .unknown:
+                            Button("Allow") {
+                                permission.request()
+                            }
+                        case .authorized:
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                        case .denied:
+                            Button("Open Settings") {
+                                NSWorkspace.shared.openSystemSettings()
+                            }
+                        }
+                    }
+                    
+                    // 麦克风权限
+                    LabeledContent("Microphone Access") {
+                        switch permission.microphoneStatus {
+                        case .unknown:
+                            Button("Allow") {
+                                permission.request()
+                            }
+                        case .authorized:
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                        case .denied:
+                            Button("Open Settings") {
+                                NSWorkspace.shared.openSystemSettings()
+                            }
+                        }
+                    }
+                    
+                    // 权限说明
+                    if permission.audioStatus == .denied || permission.microphoneStatus == .denied {
+                        Text("Please grant both permissions to continue")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
+                    }
+                }
             }
         }
         .formStyle(.grouped)
-    }
-
-    @ViewBuilder
-    private var requestPermissionView: some View {
-        LabeledContent("Please Allow Audio Recording") {
-            Button("Allow") {
-                permission.request()
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var permissionDeniedView: some View {
-        LabeledContent("Audio Recording Permission Required") {
-            Button("Open System Settings") {
-                NSWorkspace.shared.openSystemSettings()
-            }
-        }
     }
 
     @ViewBuilder
@@ -48,7 +72,6 @@ extension NSWorkspace {
             assertionFailure("Failed to get System Settings app URL")
             return
         }
-
         openApplication(at: url, configuration: .init())
     }
 }

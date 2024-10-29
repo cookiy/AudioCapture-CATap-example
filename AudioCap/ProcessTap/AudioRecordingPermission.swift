@@ -1,8 +1,8 @@
 import SwiftUI
 import Observation
 import OSLog
+import AVFoundation
 
-/// Uses TCC SPI in order to check/request system audio recording permission.
 @Observable
 final class AudioRecordingPermission {
     private let logger = Logger(subsystem: kAppSubsystem, category: String(describing: AudioRecordingPermission.self))
@@ -13,7 +13,12 @@ final class AudioRecordingPermission {
         case authorized
     }
 
-    private(set) var status: Status = .unknown
+    private(set) var audioStatus: Status = .unknown
+    private(set) var microphoneStatus: Status = .unknown
+    
+    var isAllGranted: Bool {
+        return audioStatus == .authorized && microphoneStatus == .authorized
+    }
 
     init() {
         #if ENABLE_TCC_SPI
@@ -23,14 +28,21 @@ final class AudioRecordingPermission {
         }
 
         updateStatus()
+        checkMicrophonePermission()
         #else
-        status = .authorized
-        #endif // ENABLE_TCC_SPI
+        audioStatus = .authorized
+        microphoneStatus = .authorized
+        #endif
     }
 
     func request() {
+        requestAudioPermission()
+        requestMicrophonePermission()
+    }
+    
+    private func requestAudioPermission() {
         #if ENABLE_TCC_SPI
-        logger.debug(#function)
+        logger.debug("Requesting audio permission")
 
         guard let request = Self.requestSPI else {
             logger.fault("Request SPI missing")
@@ -39,23 +51,27 @@ final class AudioRecordingPermission {
 
         request("kTCCServiceAudioCapture" as CFString, nil) { [weak self] granted in
             guard let self else { return }
-
-            self.logger.info("Request finished with result: \(granted, privacy: .public)")
-
+            
             DispatchQueue.main.async {
-                if granted {
-                    self.status = .authorized
-                } else {
-                    self.status = .denied
-                }
+                self.audioStatus = granted ? .authorized : .denied
             }
         }
-        #endif // ENABLE_TCC_SPI
+        #endif
+    }
+    
+    private func requestMicrophonePermission() {
+        AVCaptureDevice.requestAccess(for: .audio) { [weak self] granted in
+            guard let self else { return }
+            
+            DispatchQueue.main.async {
+                self.microphoneStatus = granted ? .authorized : .denied
+            }
+        }
     }
 
     private func updateStatus() {
         #if ENABLE_TCC_SPI
-        logger.debug(#function)
+        logger.debug("Updating status")
 
         guard let preflight = Self.preflightSPI else {
             logger.fault("Preflight SPI missing")
@@ -65,20 +81,32 @@ final class AudioRecordingPermission {
         let result = preflight("kTCCServiceAudioCapture" as CFString, nil)
         
         if result == 1 {
-            status = .denied
+            audioStatus = .denied
         } else if result == 0 {
-            status = .authorized
+            audioStatus = .authorized
         } else {
-            status = .unknown
+            audioStatus = .unknown
         }
-        #endif // ENABLE_TCC_SPI
+        #endif
+    }
+    
+    private func checkMicrophonePermission() {
+        switch AVCaptureDevice.authorizationStatus(for: .audio) {
+        case .authorized:
+            microphoneStatus = .authorized
+        case .denied, .restricted:
+            microphoneStatus = .denied
+        case .notDetermined:
+            microphoneStatus = .unknown
+        @unknown default:
+            microphoneStatus = .unknown
+        }
     }
 
     #if ENABLE_TCC_SPI
     private typealias PreflightFuncType = @convention(c) (CFString, CFDictionary?) -> Int
     private typealias RequestFuncType = @convention(c) (CFString, CFDictionary?, @escaping (Bool) -> Void) -> Void
 
-    /// `dlopen` handle to the TCC framework.
     private static let apiHandle: UnsafeMutableRawPointer? = {
         let tccPath = "/System/Library/PrivateFrameworks/TCC.framework/Versions/A/TCC"
 
@@ -90,7 +118,6 @@ final class AudioRecordingPermission {
         return handle
     }()
 
-    /// `dlsym` function handle for `TCCAccessPreflight`.
     private static let preflightSPI: PreflightFuncType? = {
         guard let apiHandle else { return nil }
 
@@ -106,7 +133,6 @@ final class AudioRecordingPermission {
         return fn
     }()
 
-    /// `dlsym` function handle for `TCCAccessRequest`.
     private static let requestSPI: RequestFuncType? = {
         guard let apiHandle else { return nil }
 
@@ -121,5 +147,5 @@ final class AudioRecordingPermission {
 
         return fn
     }()
-    #endif // ENABLE_TCC_SPI
+    #endif
 }
