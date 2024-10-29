@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:AudioCapture-example}",
+      "name": "Debug AudioCapture-example",
+      "program": "${workspaceFolder:AudioCapture-example}/.build/debug/AudioCapture-example",
+      "preLaunchTask": "swift: Build Debug AudioCapture-example"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:AudioCapture-example}",
+      "name": "Release AudioCapture-example",
+      "program": "${workspaceFolder:AudioCapture-example}/.build/release/AudioCapture-example",
+      "preLaunchTask": "swift: Build Release AudioCapture-example"
+    }
+  ]
+}
