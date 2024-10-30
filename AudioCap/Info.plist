@@ -2,7 +2,34 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSAudioCaptureUsageDescription</key>
-	<string>Please allow access in order to capture audio from other apps.</string>
+    <!-- 系统音频捕获权限 -->
+    <key>NSAudioCaptureUsageDescription</key>
+    <string>需要访问系统音频捕获权限</string>
+    
+    <!-- 麦克风权限 -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>需要访问麦克风以采集声音</string>
+    
+    <!-- 本地网络权限 -->
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>需要访问本地网络以传输音频</string>
+    
+    <!-- Bonjour 服务 -->
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_audiocap._tcp</string>
+        <string>_audiocap._udp</string>
+    </array>
+    
+    <!-- 系统扩展权限 -->
+    <key>NSSystemExtensionUsageDescription</key>
+    <string>需要系统扩展以采集系统音频</string>
+    
+    <!-- 网络权限 -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsLocalNetworking</key>
+        <true/>
+    </dict>
 </dict>
 </plist>
