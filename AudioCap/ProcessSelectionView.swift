@@ -9,7 +9,6 @@ struct ProcessSelectionView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            // 系统声音选择
             VStack(alignment: .leading, spacing: 5) {
                 Text("系统声音")
                     .font(.system(size: 16, weight: .medium))
@@ -56,64 +55,6 @@ struct ProcessSelectionView: View {
                 .cornerRadius(8)
             }
             
-            // 声音传输服务状态
-            VStack(alignment: .leading, spacing: 5) {
-                Text("声音传输服务")
-                    .font(.system(size: 16, weight: .medium))
-                
-                HStack {
-                    Circle()
-                        .fill(Color.green)
-                        .frame(width: 8, height: 8)
-                    Text("服务运行中 | 服务端口: 1024")
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    
-                    Button(action: {}) {
-                        Image(systemName: "arrow.clockwise")
-                            .foregroundColor(.purple)
-                    }
-                    .buttonStyle(.plain)
-                    
-                    Button(action: {}) {
-                        Image(systemName: "pause.fill")
-                            .foregroundColor(.purple)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding()
-                .background(Color(NSColor.controlBackgroundColor))
-                .cornerRadius(8)
-            }
-            
-            // 连接地址
-            VStack(alignment: .leading, spacing: 5) {
-                Text("连接地址")
-                    .font(.system(size: 16, weight: .medium))
-                Text("其他设备可通过此地址接收声音")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                HStack {
-                    Text("192.168.3.29:10240")
-                    Spacer()
-                    Button(action: {}) {
-                        Image(systemName: "qrcode")
-                            .foregroundColor(.purple)
-                    }
-                    .buttonStyle(.plain)
-                    
-                    Button(action: {}) {
-                        Image(systemName: "doc.on.doc")
-                            .foregroundColor(.purple)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding()
-                .background(Color(NSColor.controlBackgroundColor))
-                .cornerRadius(8)
-            }
-            
             if let tap {
                 if let errorMessage = tap.errorMessage {
                     Text(errorMessage)
@@ -127,25 +68,6 @@ struct ProcessSelectionView: View {
                             }
                         }
                 }
-            }
-            
-            Spacer()
-            
-            // 底部按钮
-            HStack {
-                Button("获取帮助") {
-                    // 帮助操作
-                }
-                .buttonStyle(.link)
-                .foregroundColor(.purple)
-                
-                Spacer()
-                
-                Button("打开网页应用") {
-                    // 打开网页操作
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.purple)
             }
         }
         .padding(30)
