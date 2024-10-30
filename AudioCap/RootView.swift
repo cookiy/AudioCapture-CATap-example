@@ -9,25 +9,20 @@ struct RootView: View {
             ProcessSelectionView()
         } else {
             VStack(spacing: 20) {
-                // 顶部图标
                 Image(systemName: "shield")
                     .resizable()
                     .frame(width: 60, height: 70)
                     .foregroundColor(.purple.opacity(0.8))
                 
-                // 标题
                 Text("权限设置")
                     .font(.system(size: 24, weight: .medium))
                 
-                // 副标题
                 Text("为确保软件正常运行，需要授予以下必要权限")
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.bottom, 10)
                 
-                // 权限列表
                 VStack(spacing: 12) {
-                    // 系统音频权限
                     permissionRow("授予系统音频权限", icon: "speaker.wave.2.fill", subtitle: "需要此权限以捕获来自对方的声音") {
                         switch permission.audioStatus {
                         case .unknown:
@@ -49,7 +44,6 @@ struct RootView: View {
                         }
                     }
                     
-                    // 麦克风权限
                     permissionRow("授予麦克风权限", icon: "mic.fill", subtitle: "需要此权限以捕获您的声音") {
                         switch permission.microphoneStatus {
                         case .unknown:
